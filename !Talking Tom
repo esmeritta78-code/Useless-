@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Talking Tom - Reverse Talk</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to bottom right, #ffcc70, #ff8177);
+            color: #333;
+            text-align: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ff0055;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        #tomImage {
+            width: 250px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        #tomImage:hover {
+            transform: scale(1.1);
+        }
+
+        button {
+            background-color: #ff0055;
+            color: white;
+            padding: 12px 25px;
+            margin: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e6004c;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Talking Tom - Reverse Talk</h1>
+    <img id="tomImage" src="tom.png" alt="Talking Tom">
+    <br>
+    <button onclick="startListening()">🎤 Speak Now</button>
+
+    <footer>© 2025 Talking Tom Reverse Edition</footer>
+
+    <script>
+        function startListening() {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                let spokenText = event.results[0][0].transcript;
+                let reversed = spokenText.split("").reverse().join("");
+                speakReverse(reversed);
+            };
+        }
+
+        function speakReverse(text) {
+            let speech = new SpeechSynthesisUtterance(text);
+            let voices = window.speechSynthesis.getVoices();
+
+            // Pick a female voice if available
+            let femaleVoice = voices.find(voice => voice.name.toLowerCase().includes("female") || voice.name.toLowerCase().includes("woman"));
+            if (femaleVoice) {
+                speech.voice = femaleVoice;
+            } else if (voices.length > 0) {
+                // fallback to the first available voice
+                speech.voice = voices[0];
+            }
+
+            speech.lang = "en-US";
+            window.speechSynthesis.speak(speech);
+        }
+
+        // Load voices when available
+        window.speechSynthesis.onvoiceschanged = function() {
+            window.speechSynthesis.getVoices();
+        };
+    </script>
+</body>
+</html>
