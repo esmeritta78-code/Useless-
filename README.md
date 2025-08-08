@@ -1,53 +1,81 @@
-Invisible Maze — Gloriously Pointless 🎯
-Basic Details
-Team Name: Green Bytes 2.0
-Team Members:Abhinav K M & Meritta Elizabeth S
-
-Project Description
-A game where you navigate an invisible maze you can’t see… while random glitches, lies, and particle art compete for your attention. It’s pretty. It’s useless. It’s art.
-
-The Problem 
-Gamers today suffer from too much clarity in game design. They can see the map, understand the objectives, and actually finish things. Where’s the chaos? The mystery? The pointless wandering?
-
-The Solution 
-We removed the map, the purpose, and the victory condition. Then, we sprinkled in random glitches, fake walls, control reversals, and a hypnotic blue particle background — because if you’re going to be lost, at least be lost in style.
-
-Technical Details
-Technologies Used
-Languages: HTML, CSS, JavaScript
-
-Libraries: None (pure chaotic vanilla JS)
-
-Tools: A keyboard, a brain that said “what if?”
-
-Implementation
-Run
-Open index.html in your browser.
-
-Stare at the pretty blue strings.
-
-Move your player with arrow keys.
-
-Realize movement is pointless.
-
-Question your life choices.
-
-Project Documentation
-Screenshots
-(Replace with actual screenshots)
-
-The player, glowing with purpose they don’t actually have.
+<img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-Particles that do more work than the game itself.
+# Invisible Maze — Gloriously Pointless 🎯
 
 
-A random glitch. You don’t know why it happened, and neither do we.
+## Basic Details
+### Team Name: Green Bytes 2.0
 
-Project Demo
-🎥 Video: [Add your demo link here]
-A live demonstration of nothing making sense.
 
-Team Contributions
-Abhinav K M:Coding and implementation
-Meritta Elizabeth S:Planning ideas
+### Team Members
+- Team Lead: Abhinav K M - MA College
+- Member 2: Meritta Elizabeth S - MA College
+
+### Project Description
+A visually stunning yet entirely pointless browser game where you try to navigate an invisible maze you can’t see.
+Random glitches, fake walls, and unexpected control reversals keep you from ever “winning” — but at least the background is hypnotic.
+
+### The Problem (that doesn't exist)
+Modern games make too much sense. They have maps, objectives, and achievable goals. This is unacceptable for chaos lovers.
+
+### The Solution (that nobody asked for)
+We deleted the map, removed the purpose, and banned the win condition. Then we sprinkled in random chaos events, fake encouragement,
+and a mesmerizing blue particle background so you can be confused and entertained at the same time.
+
+## Technical Details
+### Technologies/Components Used
+For Software:
+HTML
+
+CSS
+
+JavaScript (Vanilla)
+
+
+
+
+# Installation
+No installation — just open the HTML file in your browser.
+
+# Run
+Open index.html in any modern browser.
+
+Use arrow keys to “move” your glowing player.
+
+Get confused.
+
+Accept the chaos.
+
+### Project Documentation
+For Software:
+
+# Screenshots (Add at least 3)
+![Screenshot1](screenshot 1)
+The player glowing with a false sense of purpose.
+
+![Screenshot2](screenshot 2)
+Add caption explaining what this shows
+
+![Screenshot3](screenshot 3)
+Add caption explaining what this shows
+
+
+### Project Demo
+# Video
+[Add your demo video link here]
+A video demonstration of getting nowhere, beautifully.
+
+# Additional Demos
+[Add any extra demo materials/links]
+
+## Team Contributions
+- [Abhinav K M]: Code, design, particle magic, and all the nonsense.
+- [Meritta Elizabeth S]: Decoding and Idea Generation
+
+
+---
+Made with ❤ at TinkerHub Useless Projects 
+
+![Static Badge](https://img.shields.io/badge/TinkerHub-24?color=%23000000&link=https%3A%2F%2Fwww.tinkerhub.org%2F)
+![Static Badge](https://img.shields.io/badge/UselessProjects--25-25?link=https%3A%2F%2Fwww.tinkerhub.org%2Fevents%2FQ2Q1TQKX6Q%2FUseless%2520Projects)
