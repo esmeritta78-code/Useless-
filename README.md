@@ -55,11 +55,10 @@ https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(40
 The player glowing with a false sense of purpose.
 
 https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(41).png(screenshot 2)
-Add caption explaining what this shows
+Mesmerizing particle background — the true star of the project.
 
 (https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(42).png)(screenshot 3)
-Add caption explaining what this shows
-
+A glitch in action, because the maze enjoys lying to you.
 
 ### Project Demo
 # Video
