@@ -108,3 +108,4 @@ void sendIFTTT(String count, String rollVal){
   Serial.printf("IFTTT code: %d\n", code);
   http.end();
 }
+//Meritta  Abhinav
