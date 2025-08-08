@@ -62,15 +62,15 @@ A glitch in action, because the maze enjoys lying to you.
 
 ### Project Demo
 # Video
-[Add your demo video link here]
+(https://github.com/esmeritta78-code/Useless-/blob/main/20250809042542.mp4)
 A video demonstration of getting nowhere, beautifully.
 
 # Additional Demos
-[Add any extra demo materials/links]
+(https://invisible-maze123.netlify.app/)
 
 ## Team Contributions
-- [Abhinav K M]: Code, design, particle magic, and all the nonsense.
-- [Meritta Elizabeth S]: Decoding and Idea Generation
+- Abhinav K M: Code, design, particle magic, and all the nonsense.
+- Meritta Elizabeth S: Decoding and Idea Generation
 
 
 ---
