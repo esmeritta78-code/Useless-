@@ -1,0 +1,110 @@
+// File: smart_pillow.ino
+// Dependencies: Adafruit_MPU6050, Adafruit_Sensor, Wire, WiFiClientSecure, HTTPClient
+#include <Wire.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+
+Adafruit_MPU6050 mpu;
+
+const char* ssid = "YOUR_SSID";
+const char* pass = "YOUR_PASS";
+
+// IFTTT webhook (example)
+const char* ifttt_host = "maker.ifttt.com";
+const char* ifttt_event = "pillow_roll";
+const char* ifttt_key = "YOUR_IFTTT_KEY"; // keep secret
+
+// detection params
+const float ROLL_THRESHOLD_DEG = 15.0; // trigger if roll changes > this
+const unsigned long COOLDOWN_MS = 4000;
+const float ALPHA = 0.98; // complementary filter
+const int SAMPLE_INTERVAL_MS = 30;
+
+float roll = 0.0;
+unsigned long last_ms = 0;
+unsigned long lastTrigger = 0;
+int rollCount = 0;
+
+// optional pressure sensor pin (set to -1 to disable)
+const int PRESSURE_PIN = 34;
+const int OCCUPIED_ADC_THRESHOLD = 1500; // tune (0-4095)
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  if (!mpu.begin()) {
+    Serial.println("MPU6050 not found");
+    while (1) delay(10);
+  }
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+  WiFi.begin(ssid, pass);
+  Serial.print("Connecting WiFi");
+  while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(300); }
+  Serial.println(" connected");
+  last_ms = millis();
+}
+
+void loop() {
+  unsigned long now = millis();
+  if (now - last_ms < SAMPLE_INTERVAL_MS) return;
+  float dt = (now - last_ms) / 1000.0;
+  last_ms = now;
+
+  sensors_event_t aevent, gevent, temp;
+  mpu.getEvent(&aevent, &gevent, &temp);
+
+  // accel angles (degrees)
+  float ax = aevent.acceleration.x;
+  float ay = aevent.acceleration.y;
+  float az = aevent.acceleration.z;
+  float accel_roll = atan2(ay, az) * 180.0 / PI;
+
+  // gyro z is rotation around Z-axis; for roll we use gyro x or y depending mount
+  // use gevent.gyro.x (rad/s) convert to deg/s
+  float gyro_x = gevent.gyro.x * 180.0 / PI;
+  // integrate gyro
+  float roll_gyro = roll + gyro_x * dt;
+
+  // complementary filter
+  roll = ALPHA * roll_gyro + (1.0 - ALPHA) * accel_roll;
+
+  static float stableRoll = roll; // last stable reference
+  float diff = abs(roll - stableRoll);
+
+  // check occupancy if pressure sensor present
+  bool occupied = true;
+  if (PRESSURE_PIN >= 0) {
+    int adc = analogRead(PRESSURE_PIN);
+    occupied = (adc >= OCCUPIED_ADC_THRESHOLD);
+  }
+
+  if (occupied && (diff >= ROLL_THRESHOLD_DEG) && (now - lastTrigger > COOLDOWN_MS)) {
+    lastTrigger = now;
+    rollCount++;
+    Serial.printf("Roll detected #%d  roll=%.1f diff=%.1f\n", rollCount, roll, diff);
+    // send webhook
+    sendIFTTT(String(rollCount), String(roll));
+    // update stable reference (avoid small oscillations)
+    stableRoll = roll;
+  }
+
+  // slow drift correction: if small changes for long time, update stableRoll gradually
+  if (diff < 2.0 && (now - lastTrigger) > 5000) {
+    stableRoll = stableRoll * 0.999 + roll * 0.001;
+  }
+}
+
+void sendIFTTT(String count, String rollVal){
+  if (WiFi.status() != WL_CONNECTED) return;
+  HTTPClient http;
+  String url = String("https://maker.ifttt.com/trigger/") + ifttt_event + "/with/key/" + ifttt_key + "?value1=" + count + "&value2=" + rollVal;
+  http.begin(url);
+  int code = http.GET();
+  Serial.printf("IFTTT code: %d\n", code);
+  http.end();
+}
