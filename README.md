@@ -51,7 +51,7 @@ Accept the chaos.
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](screenshot 1)
+https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(40).png(screenshot 1)
 The player glowing with a false sense of purpose.
 
 https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(41).png(screenshot 2)
