@@ -1,111 +1,130 @@
-// File: smart_pillow.ino
-// Dependencies: Adafruit_MPU6050, Adafruit_Sensor, Wire, WiFiClientSecure, HTTPClient
-#include <Wire.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
 
-Adafruit_MPU6050 mpu;
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Useless Neon Maze Deluxe</title>
+  <style>
+    html, body {
+      height:100%; margin:0;
+      background:#000; display:flex;
+      justify-content:center; align-items:center;
+      color:#e0e0e0; font-family:'Segoe UI',sans-serif;
+    }
+    #stage {
+      position:relative; width:720px; height:480px;
+      background:
+        linear-gradient(#0a0f18 1px,transparent 1px),
+        linear-gradient(90deg,#0a0f18 1px,transparent 1px),#0f1822;
+      background-size:40px 40px;
+      box-shadow: inset 0 0 50px #0ff;margin-bottom:20px;
+      border-radius:12px;
+      overflow:hidden;
+    }
+    @keyframes gridPulse {
+      0%,100% { filter:brightness(120%); }
+      50% { filter:brightness(200%); }
+    }
+    #stage { animation: gridPulse 4s ease-in-out infinite alternate; }
+    .player {
+      position:absolute;width:14px;height:14px;
+      background:radial-gradient(circle,#ff0055,#880022);
+      border-radius:50%;
+      box-shadow:0 0 12px 4px rgba(255,0,85,0.7);
+      transition:transform .3s,opacity .3s;
+    }
+    @keyframes teleportAnim {
+      0% { transform: scale(1); opacity:1;}
+      50% { transform: scale(0.2); opacity:0;}
+      100% { transform: scale(1); opacity:1;}
+    }
+    .teleport { animation: teleportAnim 0.4s ease-in; }
+    .badge {
+      position:absolute;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%) scale(0);
+      background: #0f0;
+      color: #000; padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: none;
+    }
+    @keyframes badgePop {
+      0% { transform: translate(-50%,-50%) scale(0); opacity: 0;}
+      50% { transform: translate(-50%,-50%) scale(1.3); opacity: 1;}
+      100% { transform: translate(-50%,-50%) scale(1); opacity: 1;}
+    }
+    .badge.show { animation: badgePop 0.6s ease-out forwards; }
+    .hud {
+      position:absolute; top:10px; left:10px;
+      background:rgba(0,0,0,0.6); padding:6px;
+      border-radius:4px; font-size:14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <div class="hud">Pos: <span id="pos">1,1</span></div>
+    <div class="badge" id="badge">Badge!</div>
+  </div>
+<script>
+const TILE=40, COLS=18, ROWS=12;
+const stage=document.getElementById('stage');
+const posEl=document.getElementById('pos');
+const badge=document.getElementById('badge');
+let px=1, py=1, cd=0;
 
-const char* ssid = "YOUR_SSID";
-const char* pass = "YOUR_PASS";
+const maze = Array.from({length:ROWS}, (_, r) => Array.from({length:COLS}, (_, c) => 
+  r===0||c===0||r===ROWS-1||c===COLS-1 ? 1 :
+  (r===1&&c===1)?0 : (Math.random()<0.22?1:0)
+));
 
-// IFTTT webhook (example)
-const char* ifttt_host = "maker.ifttt.com";
-const char* ifttt_event = "pillow_roll";
-const char* ifttt_key = "YOUR_IFTTT_KEY"; // keep secret
+const player=document.createElement('div');
+player.className='player';
+stage.appendChild(player);
 
-// detection params
-const float ROLL_THRESHOLD_DEG = 15.0; // trigger if roll changes > this
-const unsigned long COOLDOWN_MS = 4000;
-const float ALPHA = 0.98; // complementary filter
-const int SAMPLE_INTERVAL_MS = 30;
+function render(){
+  player.style.left = `${px*TILE + TILE/2 -7}px`;
+  player.style.top = `${py*TILE + TILE/2 -7}px`;
+  posEl.textContent = `${px},${py}`;
 
-float roll = 0.0;
-unsigned long last_ms = 0;
-unsigned long lastTrigger = 0;
-int rollCount = 0;
-
-// optional pressure sensor pin (set to -1 to disable)
-const int PRESSURE_PIN = 34;
-const int OCCUPIED_ADC_THRESHOLD = 1500; // tune (0-4095)
-
-void setup() {
-  Serial.begin(115200);
-  Wire.begin();
-  if (!mpu.begin()) {
-    Serial.println("MPU6050 not found");
-    while (1) delay(10);
-  }
-  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
-  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-
-  WiFi.begin(ssid, pass);
-  Serial.print("Connecting WiFi");
-  while (WiFi.status() != WL_CONNECTED) { Serial.print("."); delay(300); }
-  Serial.println(" connected");
-  last_ms = millis();
-}
-
-void loop() {
-  unsigned long now = millis();
-  if (now - last_ms < SAMPLE_INTERVAL_MS) return;
-  float dt = (now - last_ms) / 1000.0;
-  last_ms = now;
-
-  sensors_event_t aevent, gevent, temp;
-  mpu.getEvent(&aevent, &gevent, &temp);
-
-  // accel angles (degrees)
-  float ax = aevent.acceleration.x;
-  float ay = aevent.acceleration.y;
-  float az = aevent.acceleration.z;
-  float accel_roll = atan2(ay, az) * 180.0 / PI;
-
-  // gyro z is rotation around Z-axis; for roll we use gyro x or y depending mount
-  // use gevent.gyro.x (rad/s) convert to deg/s
-  float gyro_x = gevent.gyro.x * 180.0 / PI;
-  // integrate gyro
-  float roll_gyro = roll + gyro_x * dt;
-
-  // complementary filter
-  roll = ALPHA * roll_gyro + (1.0 - ALPHA) * accel_roll;
-
-  static float stableRoll = roll; // last stable reference
-  float diff = abs(roll - stableRoll);
-
-  // check occupancy if pressure sensor present
-  bool occupied = true;
-  if (PRESSURE_PIN >= 0) {
-    int adc = analogRead(PRESSURE_PIN);
-    occupied = (adc >= OCCUPIED_ADC_THRESHOLD);
-  }
-
-  if (occupied && (diff >= ROLL_THRESHOLD_DEG) && (now - lastTrigger > COOLDOWN_MS)) {
-    lastTrigger = now;
-    rollCount++;
-    Serial.printf("Roll detected #%d  roll=%.1f diff=%.1f\n", rollCount, roll, diff);
-    // send webhook
-    sendIFTTT(String(rollCount), String(roll));
-    // update stable reference (avoid small oscillations)
-    stableRoll = roll;
-  }
-
-  // slow drift correction: if small changes for long time, update stableRoll gradually
-  if (diff < 2.0 && (now - lastTrigger) > 5000) {
-    stableRoll = stableRoll * 0.999 + roll * 0.001;
+  // Start badge on first move
+  if(px+py>2 && !badge.classList.contains('show')){
+    badge.classList.add('show');
+    setTimeout(()=>badge.classList.remove('show'), 1200);
   }
 }
 
-void sendIFTTT(String count, String rollVal){
-  if (WiFi.status() != WL_CONNECTED) return;
-  HTTPClient http;
-  String url = String("https://maker.ifttt.com/trigger/") + ifttt_event + "/with/key/" + ifttt_key + "?value1=" + count + "&value2=" + rollVal;
-  http.begin(url);
-  int code = http.GET();
-  Serial.printf("IFTTT code: %d\n", code);
-  http.end();
+function teleportEff(nx, ny){
+  player.classList.add('teleport');
+  setTimeout(()=>{
+    px = nx; py = ny;
+    render();
+    player.classList.remove('teleport');
+  }, 200);
 }
-//Meritta  Abhinav
+
+function canMove(nx,ny){
+  return !(nx<0||ny<0||nx>=COLS||ny>=ROWS) && maze[ny][nx]===0;
+}
+
+window.addEventListener('keydown', e => {
+  if(Date.now()<cd) return;
+  cd = Date.now()+100;
+  let dx=0, dy=0;
+  if(e.key==='ArrowUp') dy=-1;
+  else if(e.key==='ArrowDown') dy=1;
+  else if(e.key==='ArrowLeft') dx=-1;
+  else if(e.key==='ArrowRight') dx=1;
+  else return;
+
+  const nx=px+dx, ny=py+dy;
+  if(canMove(nx,ny)) { px=nx; py=ny; render(); }
+  else teleportEff(px, py);
+});
+
+render();
+</script>
+</body>
+</html>
