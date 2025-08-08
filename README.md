@@ -57,7 +57,7 @@ The player glowing with a false sense of purpose.
 https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(41).png(screenshot 2)
 Add caption explaining what this shows
 
-![Screenshot3](screenshot 3)
+(https://github.com/esmeritta78-code/Useless-/blob/main/ulphotos/Screenshot%20(42).png)(screenshot 3)
 Add caption explaining what this shows
 
 
