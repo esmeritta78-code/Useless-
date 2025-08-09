@@ -62,7 +62,7 @@ A glitch in action, because the maze enjoys lying to you.
 
 ### Project Demo
 # Video
-(https://github.com/esmeritta78-code/Useless-/blob/main/20250809042542.mp4)
+[(https://github.com/esmeritta78-code/Useless-/blob/main/20250809042542.mp4)](https://youtu.be/npe8Eq7YXX0)
 A video demonstration of getting nowhere, beautifully.
 
 # Additional Demos
